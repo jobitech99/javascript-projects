@@ -1,0 +1,40 @@
+const readline = require("readline");
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const expenses = [];
+
+function printSummary() {
+  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+  console.log("\n--- Expenses ---");
+  expenses.forEach((e, i) => {
+    console.log(`${i + 1}. ${e.label}: ${e.amount}`);
+  });
+  console.log(`Total: ${total}\n`);
+}
+
+function askNext() {
+  rl.question('Add expense as "label,amount" (or type "done"): ', (input) => {
+    if (input.trim().toLowerCase() === "done") {
+      printSummary();
+      rl.close();
+      return;
+    }
+
+    const [label, amountStr] = input.split(",").map((s) => s.trim());
+    const amount = Number(amountStr);
+
+    if (!label || Number.isNaN(amount)) {
+      console.log("Invalid format. Use: label,amount");
+    } else {
+      expenses.push({ label, amount });
+    }
+
+    askNext();
+  });
+}
+
+askNext();

@@ -1,0 +1,68 @@
+const readline = require("readline");
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const students = [];
+
+function average(scores) {
+  const total = scores.reduce((sum, score) => sum + score, 0);
+  return total / scores.length;
+}
+
+function processStudents(list) {
+  return list.map((student) => {
+    const avg = average(student.scores);
+    return {
+      name: student.name,
+      average: Number(avg.toFixed(2)),
+      passed: avg >= 50,
+    };
+  });
+}
+
+function printResults() {
+  const results = processStudents(students);
+
+  results.forEach((r) => {
+    const status = r.passed ? "PASS" : "FAIL";
+    console.log(`${r.name}: average ${r.average} -> ${status}`);
+  });
+
+  const classAverage = average(results.map((r) => r.average));
+  console.log(`\nClass average: ${classAverage.toFixed(2)}`);
+}
+
+function askStudent() {
+  rl.question('\nStudent name (or "done" to finish): ', (name) => {
+    if (name.trim().toLowerCase() === "done") {
+      if (students.length === 0) {
+        console.log("No students entered.");
+      } else {
+        printResults();
+      }
+      rl.close();
+      return;
+    }
+
+    rl.question(
+      `Enter ${name}'s scores, comma-separated (e.g. 78,65,90): `,
+      (scoreInput) => {
+        const scores = scoreInput.split(",").map((s) => Number(s.trim()));
+        const valid = scores.every((s) => !Number.isNaN(s));
+
+        if (!valid || scores.length === 0) {
+          console.log("Invalid scores, try this student again.");
+        } else {
+          students.push({ name, scores });
+        }
+
+        askStudent();
+      },
+    );
+  });
+}
+
+askStudent();
